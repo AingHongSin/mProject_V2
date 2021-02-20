@@ -1,4 +1,5 @@
 from tkinter import *
+import itertools
 from tkmacosx import Button, CircleButton, SFrame
 
 FONT = ('Pacifico', 28, 'bold')
@@ -17,12 +18,14 @@ class UI:
 
         # Variable Section
         self.valueListVar = []
+        self.entryWidgetVar = []
         self.listSlot = []
         self.amountSlot = 0
         slotEntryName = None
         slotLabelName = None
         self.lastEntry = ''
         self.lastLabel = ''
+        self.searchVar = IntVar()
 
         self.inputValueVar = StringVar()
 
@@ -62,7 +65,7 @@ class UI:
         self.searchMessageLabel.pack(side='left', pady=10)
 
         self.searchInputEntry = Entry(self.middleFrame, width=19, highlightthickness=0, relief='flat',
-                                      font=('defult', 22))
+                                      font=('defult', 22), textvariable=self.searchVar)
         self.searchInputEntry.pack(side='left', pady=10, padx=15)
 
         self.calculateButton = Button(self.middleFrame, text='Calculate', font=('Pacifico', 14), fg=TITLE_COLOR)
@@ -81,18 +84,17 @@ class UI:
         self.slotLabelName = Label(Box_Slot, text=f"Slot {self.amountSlot}", font=('Pacifico', 14))
         self.slotLabelName.grid(row=0, column=0, padx=5, pady=10)
 
-        # self.slotEntryValue = f"Slot {len(self.listSlot)}"
-        self.slotEntryValue = Entry(Box_Slot, width=25, font=('default', 22))
-        self.slotEntryValue.grid(row=0, column=1)
-        self.slotEntryValue.bind('<Return>', self.addValue)
-        self.slotEntryValue.focus()
+        slotEntryValue = f"Slot {len(self.listSlot)}"
+        slotEntryValue = Entry(Box_Slot, width=25, font=('default', 22))
+        slotEntryValue.grid(row=0, column=1)
+        slotEntryValue.bind('<Return>', self.addValue)
+        slotEntryValue.focus()
+
+        self.entryWidgetVar.append(slotEntryValue)
 
         self.deleteSlotButton = CircleButton(Box_Slot, text='➖', width=30, borderless=5)
         self.deleteSlotButton.config(command=lambda slot=Box_Slot: self.deleteSlot_Function(slot))
         self.deleteSlotButton.grid(row=0, column=2 , padx=10)
-
-        # if self.slotEntryValue.get() != '':
-
 
     def addSlot_Function(self):
 
@@ -100,7 +102,7 @@ class UI:
         self.listSlot.append(f"Slot {self.amountSlot} :")
         self.slotInput()
 
-    def deleteSlot_Function(self,  box):
+    def deleteSlot_Function(self, box):
         global slotLabelName
         global slotEntryValue
 
@@ -108,17 +110,32 @@ class UI:
         # self.lastEntry = self.listSlot[-1]
         box.pack_forget()
 
-        self.listSlot.remove(self.listSlot[-1])
-
     def addValue(self):
         self.valueListVar.append(int(self.slotEntryValue.get()))
-        print(self.valueListVar)
-
 
     def Calculate(self):
-        print("Done")
+        for value in self.entryWidgetVar:
+            self.valueListVar.append(value.get())
+"""
+        self.mesDisplayUpper = Message(self.displayFrame, width=540)
+        self.mesDisplayUpper.config(text=f"All the data is corresponding sum and the data have :")
+        self.mesDisplayUpper.pack()
+
+        if sum(self.valueListVar) == int(self.searchVar):
+            self.mesTotal = Message(self.displayFrame, width=540)
+            self.mesTotal.config(text=f"Sum of all slots equal to the search amount")
+            self.mesTotal.pack()
+            self.check = True
 
 
+        for a in range(len(self.valueListVar)):
+            for b in itertools.combinations(self.valueListVar, a):
+                if int(sum(b)) == int(self.searchVar):
+                    self.mesDisplay =Message(self.displayFrame, text=(f"Which has {b}"), width=540, justify = 'left')
+                    self.mesDisplay.pack()
+                    self.check = True
+
+"""
 
 if __name__ == '__main__':
     UI()
