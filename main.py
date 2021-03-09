@@ -16,14 +16,12 @@ class UI:
         self.mainWindow.title("TRANSACTION CLEARER")
         self.mainWindow.config(background=BACKGROUND_COLOR)
         self.mainWindow.config(pady=10)
+        self.mainWindow.resizable(False, False)
 
         # Variable Section
-        self.valueListVar = []
-        self.entryWidgetVar = []
-        self.listSlot = []
         self.amountSlot = 0
 
-        self.inputValueVar = StringVar()
+        self.global_variable()
 
         # Frame Section
         self.topFrame = Frame(self.mainWindow, bg=BACKGROUND_COLOR)
@@ -55,7 +53,6 @@ class UI:
         self.addButton.config(command=self.addSlot_Function)
         self.addButton.pack(side='right')
 
-
         # self.slotInput()
 
         self.searchMessageLabel = Label(self.middleFrame, text='Search: ', font=SEARCH_LABEL_FONT)
@@ -65,13 +62,21 @@ class UI:
         self.searchInputEntry = Entry(self.middleFrame, width=19, highlightthickness=0, relief='flat',
                                       font=('defult', 22))
         self.searchInputEntry.pack(side='left', pady=10, padx=15)
+        self.searchInputEntry.bind("<Return>", self.EnterBindingKey)
 
         self.calculateButton = Button(self.middleFrame, text='Calculate', font=('Pacifico', 14), fg=TITLE_COLOR)
         self.calculateButton.config(width=120, height=33, borderless=5)
-        self.calculateButton.config(command=self.Calculate)
+        self.calculateButton.config(command=self.calculate_and_dislplay)
         self.calculateButton.pack(side='right', pady=10)
 
         self.mainWindow.mainloop()
+
+    def global_variable(self):
+
+        self.valueListVar = []
+        self.entryWidgetVar = []
+        self.listSlot = []
+        self.h = False
 
     def slotInput(self):
 
@@ -91,7 +96,10 @@ class UI:
 
         self.deleteSlotButton = CircleButton(Box_Slot, text='➖', width=30, borderless=5)
         self.deleteSlotButton.config(command=lambda slot=Box_Slot: self.deleteSlot_Function(slot))
-        self.deleteSlotButton.grid(row=0, column=2 , padx=10)
+        self.deleteSlotButton.grid(row=0, column=2, padx=10)
+
+    def EnterBindingKey(self, event):
+        self.calculate_and_dislplay()
 
     def addSlot_Function(self):
 
@@ -107,36 +115,63 @@ class UI:
         # self.lastEntry = self.listSlot[-1]
         box.pack_forget()
 
-    def Calculate(self):
-        for value in self.entryWidgetVar:
-            self.valueListVar.append(float(value.get()))
-
-        if self.searchInputEntry.get() == '' or self.searchInputEntry.get() == 0:
-            messagebox.showwarning("Warning", 'Please enter Number in Search slot')
+    def checking(self, input_value):
+        checking_var = ''
+        if type(input_value) == list:
+            for value in input_value:
+                try:
+                   self.valueListVar.append(float(value.get()))
+                   checking_var = True
+                except:
+                    messagebox.showwarning("Warning", f"Please enter number in slots. {value.get()} is not a number.")
+                    checking_var = False
+                    break
+                    self.global_variable()
 
         else:
-            print(self.valueListVar)
-            valueSearching = int(self.searchInputEntry.get())
-            print(valueSearching)
+            try:
+                self.search_num = int(input_value)
+                checking_var = True
+            except:
+                messagebox.showwarning("Warning", f"Please enter number in search slot. {input_value} is not a number.")
+                checking_var = False
 
-            self.mesDisplayUpper = Message(self.displayFrame, width=540)
-            self.mesDisplayUpper.config(text=f"All the data is corresponding sum and the data have :")
-            self.mesDisplayUpper.pack()
-
-            if sum(self.valueListVar) == valueSearching:
-                self.mesTotal = Message(self.displayFrame, width=540)
-                self.mesTotal.config(text=f"Sum of all slots equal to the search amount")
-                self.mesTotal.pack()
-
-            for a in range(len(self.valueListVar)):
-                for b in itertools.combinations(self.valueListVar, a):
-                    if int(sum(b)) == int(valueSearching):
-                        self.mesDisplay = Message(self.displayFrame, text=f"Which has {b}", width=540, justify = 'left')
-                        self.mesDisplay.pack()
+        return checking_var
 
     def resetData(self, event):
-
         self.mainWindow.destroy()
         self.__init__()
+
+    def calculate_and_dislplay(self):
+        if self.checking(self.entryWidgetVar):
+
+            if self.checking(self.searchInputEntry.get()):
+                self.mesDisplayUpper = Message(self.displayFrame, width=540)
+                self.mesDisplayUpper.pack()
+                self.mesDisplayUpper.config(text=f"All the data is corresponding sum and the data have :")
+
+                if sum(self.valueListVar) == int(self.search_num):
+                    self.mesTotal = Message(self.displayFrame, width=540)
+                    self.mesTotal.pack()
+                    self.mesTotal.config(text=f"Sum of all slots equal to the search amount")
+
+                for a in range(len(self.valueListVar)):
+                    print(a)
+                    for b in itertools.combinations(self.valueListVar, a):
+                        print(b)
+                        if int(sum(b)) == self.search_num:
+                            self.mesDisplay = Message(self.displayFrame, width=540, justify='left')
+                            self.mesDisplay.pack()
+
+                            self.mesDisplay.config( text=f"Which has {b}")
+                            self.h = True
+
+
+                if not self.h:
+                    self.mesDisplay.config(text=("No Datas Found!"))
+
+                self.global_variable()
+
+
 if __name__ == '__main__':
     UI()
